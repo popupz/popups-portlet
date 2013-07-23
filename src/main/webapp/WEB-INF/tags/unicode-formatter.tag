@@ -1,0 +1,1 @@
+<%@ tag import="com.liferay.portal.kernel.util.UnicodeFormatter" %><%@ attribute name="message" required="true" %><%= UnicodeFormatter.toString(message) %>

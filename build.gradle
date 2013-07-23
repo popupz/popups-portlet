@@ -1,0 +1,105 @@
+buildscript {
+    repositories {
+        mavenLocal()
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'com.github.jelmerk', name: 'liferay-plugin', version: '0.1.0-SNAPSHOT'
+    }
+}
+
+defaultTasks 'clean', 'deploy'
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+apply plugin: 'idea'
+apply plugin: 'scala'
+apply plugin: 'liferay-portlet'
+apply plugin: 'liferay-servicebuilder'
+
+archivesBaseName = 'popups-portlet'
+version = '1.0.0'
+
+idea {
+    module {
+        sourceDirs += sourceSets.service.allJava.srcDirs
+    }
+}
+
+sourceSets {
+    main {
+        // needed because service.properties gets written there by servicebuilder
+        resources {
+            srcDir 'src/main/scala'
+        }
+    }
+}
+
+liferay {
+    appServerDirName = liferayHome
+}
+
+servicebuilder {
+    serviceInputFileName = file('src/main/servicebuilder/service.xml')
+    jalopyInputFileName  = file('src/main/servicebuilder/jalopy.xml')
+
+    // put the service builder classes in src/main/scala for joint compilation
+    implSrcDirName = file('src/main/scala')
+}
+
+war {
+    archiveName "$baseName-6.1.1.war"
+}
+
+compileScala {
+    scalaCompileOptions.useCompileDaemon = true
+    scalaCompileOptions.daemonServer = "localhost:4243"
+}
+
+tasks.withType(ScalaCompile) {
+    scalaCompileOptions.useAnt = false
+}
+
+sassToCss.enabled = false
+
+dependencies {
+
+    compile 'org.scala-lang:scala-library:2.10.1'
+    compile sourceSets.service.output
+
+    providedCompile 'javax.servlet:servlet-api:2.5'
+    providedCompile 'javax.servlet.jsp:jsp-api:2.1'
+
+    providedCompile fileTree(dir: "$liferay.appServerGlobalLibDir", include: "*.jar")
+
+    providedCompile files(
+        "$liferay.appServerPortalDir/WEB-INF/lib/util-java.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/util-bridges.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/util-taglib.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/commons-logging.jar",
+
+        "$liferay.appServerPortalDir/WEB-INF/lib/asm.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/aopalliance.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/cglib.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/spring-aop.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/spring-asm.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/spring-beans.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/spring-context.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/spring-core.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/spring-expression.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/spring-web.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/spring-web-servlet.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/spring-web-portlet.jar",
+
+        "$liferay.appServerPortalDir/WEB-INF/lib/json-java.jar",
+
+        "$liferay.appServerPortalDir/WEB-INF/lib/jstl-api.jar",
+        "$liferay.appServerPortalDir/WEB-INF/lib/jstl-impl.jar"
+    )
+
+    serviceCompile files("$liferay.appServerGlobalLibDir/portal-service.jar")
+
+}

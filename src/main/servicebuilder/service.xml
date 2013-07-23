@@ -1,0 +1,52 @@
+<?xml version="1.0"?>
+<!DOCTYPE service-builder PUBLIC "-//Liferay//DTD Service Builder 6.1.0//EN" "http://www.liferay.com/dtd/liferay-service-builder_6_1_0.dtd">
+
+<service-builder package-path="com.github.popupz.popups">
+
+    <author>The original author or authors</author>
+    <namespace>JK</namespace>
+    <entity name="Popup" uuid="true" local-service="true" remote-service="true">
+
+        <!-- PK fields -->
+
+        <column name="popupId" type="long" primary="true" />
+
+        <!-- Group instance -->
+
+        <column name="groupId" type="long" />
+        <column name="privateLayout" type="boolean" />
+
+        <!-- Audit fields -->
+
+        <column name="companyId" type="long" />
+        <column name="userId" type="long" />
+        <column name="userName" type="String" />
+        <column name="createDate" type="Date" />
+        <column name="modifiedDate" type="Date" />
+
+        <!-- Other fields -->
+        <column name="title" type="String" />
+        <column name="content" type="String" />
+        <column name="width" type="int" />
+        <column name="mustConfirm" type="boolean" />
+        <column name="displayType" type="String"/>
+        <column name="rules" type="String" />
+
+        <!-- Finder methods -->
+        
+        <finder name="CompanyId" return-type="Collection">
+            <finder-column name="companyId" />
+        </finder>
+
+        <finder name="GroupId" return-type="Collection">
+            <finder-column name="groupId" />
+        </finder>
+
+        <reference package-path="com.liferay.portal" entity="Company" />
+        <reference package-path="com.liferay.portal" entity="Group" />
+    </entity>
+
+    <exceptions>
+        <exception>PopupValidation</exception>
+    </exceptions>
+</service-builder>

@@ -1,0 +1,39 @@
+.rules-set {
+    margin-top:10px;
+}
+
+.rule {
+    display: table;
+    width: 100%;
+    margin-bottom: 5px;
+}
+
+.column {
+    display: table-cell;
+}
+
+.column.main {
+    width: 100%;
+    padding-right: 10px;
+}
+
+.column.main .aui-field-inline, .column.main .aui-field-inline .aui-field-content {
+    width: 100%;
+}
+
+.column.last {
+    text-align: right;
+    white-space: nowrap;
+}
+
+input.expand {
+    width:100%;
+}
+
+.buttons {
+    width: 50px;
+}
+
+.aui-field-wrapper.rules-field-wrapper {
+    overflow: visible;
+}
