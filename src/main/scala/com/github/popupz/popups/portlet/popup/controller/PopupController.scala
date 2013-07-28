@@ -88,27 +88,21 @@ class PopupController(popupLocalService: PopupLocalService,
   }
 
   private def all(rules: List[RenderRequest => Boolean])(renderRequest: RenderRequest) = {
-    @tailrec
-    def loop(rules: List[RenderRequest => Boolean], hasNonMatchingRule: Boolean): Boolean = {
-      if (hasNonMatchingRule || rules.length == 0) {
-        !hasNonMatchingRule
-      } else {
-        loop(rules.tail, !rules.head(renderRequest))
+    rules.foldLeft(true) {(result, rule) =>
+      result match {
+        case false => false
+        case _ => rule(renderRequest)
       }
     }
-    loop(rules, hasNonMatchingRule = false)
   }
 
   private def any(rules: List[RenderRequest => Boolean])(renderRequest: RenderRequest) = {
-    @tailrec
-    def loop(rules: List[RenderRequest => Boolean], hasMatchingRule: Boolean): Boolean = {
-      if (hasMatchingRule || rules.length == 0) {
-        hasMatchingRule
-      } else {
-        loop(rules.tail, rules.head(renderRequest))
+    rules.foldLeft(false) {(result, rule) =>
+      result match {
+        case true => true
+        case false => rule(renderRequest)
       }
     }
-    loop(rules, hasMatchingRule = false)
   }
 
   private def pageUrlMatches(config:JSONObject)(renderRequest: RenderRequest): Boolean = {
