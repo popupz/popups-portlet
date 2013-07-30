@@ -21,7 +21,7 @@ apply plugin: 'liferay-portlet'
 apply plugin: 'liferay-servicebuilder'
 
 archivesBaseName = 'popups-portlet'
-version = '1.0.0.0'
+version = '1.0.0.1'
 
 idea {
     module {
@@ -53,7 +53,7 @@ servicebuilder {
 
 compileScala {
     scalaCompileOptions.useCompileDaemon = true
-    scalaCompileOptions.daemonServer = "localhost:4243"
+    scalaCompileOptions.daemonServer = "localhost:3200"
 }
 
 tasks.withType(ScalaCompile) {
