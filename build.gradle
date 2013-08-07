@@ -23,6 +23,9 @@ apply plugin: 'liferay-servicebuilder'
 archivesBaseName = 'popups-portlet'
 version = '1.0.0.1'
 
+sourceCompatibility = 1.5
+targetCompatibility = 1.5
+
 idea {
     module {
         sourceDirs += sourceSets.service.allJava.srcDirs
