@@ -65,14 +65,14 @@ class PopupController(popupLocalService: PopupLocalService,
           case "user-has-site-role" => hasSiteRole(config) _
           case _ => throw new IllegalArgumentException
         }
-        loop(rulesArray, index +1, fn :: collector)
+        loop(rulesArray, index + 1, fn :: collector)
 
       }
     }
 
     val json = new JSONObject(popup.getRules)
     val rulesArray = json.getJSONArray("rules")
-    val conditionType = json.getString("conditionType") // TODO: inconsistent camel case ?
+    val conditionType = json.getString("condition-type")
 
     val ruleFns = loop(rulesArray, 0, List())
 

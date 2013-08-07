@@ -23,7 +23,7 @@ class PopupController (popupService: PopupService, popupLocalService: PopupLocal
       case id if id > 0 => popupLocalService.getPopup(id)
       case _ => {
         val popup = new PopupImpl()
-        popup.setRules("""{"conditionType":"any","rules":[{"rule-type":"on-public-pages"}]}""")
+        popup.setRules("""{"condition-type":"any","rules":[{"rule-type":"on-public-pages"}]}""")
         popup.setDisplayType("once")
         popup.setWidth(650)
         popup.setNew(true)

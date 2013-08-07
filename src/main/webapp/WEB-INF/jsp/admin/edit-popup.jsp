@@ -216,7 +216,7 @@
 
         var rulesSet = A.JSON.parse(rulesSetJson);
 
-        popupForm.one('select[name="${renderResponse.namespace}condition-type"]').set('value',rulesSet.conditionType);
+        popupForm.one('select[name="${renderResponse.namespace}condition-type"]').set('value',rulesSet['condition-type']);
 
         for (var i = 0; i < rulesSet.rules.length; i++) {
             var ruleData = rulesSet.rules[i];
@@ -320,8 +320,8 @@
             var conditionType = popupForm.one('select[name="${renderResponse.namespace}condition-type"]').get('value');
 
             popupForm.one('input[name="rules"]').set('value', A.JSON.stringify({
-                conditionType: conditionType,
-                rules: rulesList
+                'condition-type': conditionType,
+                'rules': rulesList
             }));
             popupForm.one('input[name="${renderResponse.namespace}content"]').set('value', ${renderResponse.namespace}editor.getHTML());
 
