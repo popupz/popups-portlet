@@ -4,7 +4,8 @@ buildscript {
         mavenCentral()
     }
     dependencies {
-        classpath group: 'com.github.jelmerk', name: 'liferay-plugin', version: '0.1.0-SNAPSHOT'
+        classpath 'com.github.jelmerk:liferay-plugin:0.1.0-SNAPSHOT'
+        classpath 'net.sf.proguard:proguard-gradle:4.9'
     }
 }
 
@@ -21,18 +22,14 @@ apply plugin: 'liferay-portlet'
 apply plugin: 'liferay-servicebuilder'
 
 archivesBaseName = 'popups-portlet'
-version = '1.0.0.2'
+version = '1.0.0.3'
 
 // scala 2.10 is not backwards compatible with java 5 see : https://groups.google.com/forum/#!topic/scala-language/oskST3kY7nI
 
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
-idea {
-    module {
-        sourceDirs += sourceSets.service.allJava.srcDirs
-    }
-}
+ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
 
 sourceSets {
     main {
@@ -55,6 +52,53 @@ servicebuilder {
     implSrcDirName = file('src/main/scala')
 }
 
+dependencies {
+
+    compile 'org.scala-lang:scala-library:2.10.1'
+    compile files(jarService.archivePath)
+
+    providedCompile 'javax.servlet:servlet-api:2.5'
+    providedCompile 'javax.servlet.jsp:jsp-api:2.1'
+
+    providedCompile fileTree(dir: "$liferay.appServerGlobalLibDir", include: "*.jar", exclude: ["activation.jar", "jta.jar"])
+
+    providedCompile files(
+            "$liferay.appServerPortalDir/WEB-INF/lib/util-java.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/util-bridges.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/util-taglib.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/commons-logging.jar",
+
+            "$liferay.appServerPortalDir/WEB-INF/lib/asm.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/aopalliance.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/cglib.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/spring-aop.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/spring-asm.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/spring-beans.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/spring-context.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/spring-core.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/spring-expression.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/spring-web.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/spring-web-servlet.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/spring-web-portlet.jar",
+
+            "$liferay.appServerPortalDir/WEB-INF/lib/json-java.jar",
+
+            "$liferay.appServerPortalDir/WEB-INF/lib/jstl-api.jar",
+            "$liferay.appServerPortalDir/WEB-INF/lib/jstl-impl.jar"
+    )
+
+    serviceCompile files("$liferay.appServerGlobalLibDir/portal-service.jar")
+}
+
+idea {
+    module {
+        sourceDirs += sourceSets.service.allJava.srcDirs
+    }
+}
+
+compileJava {
+    dependsOn 'jarService'
+}
 
 compileScala {
     scalaCompileOptions.useCompileDaemon = true
@@ -65,43 +109,46 @@ tasks.withType(ScalaCompile) {
     scalaCompileOptions.useAnt = false
 }
 
-sassToCss.enabled = false
-
-dependencies {
-
-    compile 'org.scala-lang:scala-library:2.10.1'
-    compile sourceSets.service.output
-
-    providedCompile 'javax.servlet:servlet-api:2.5'
-    providedCompile 'javax.servlet.jsp:jsp-api:2.1'
-
-    providedCompile fileTree(dir: "$liferay.appServerGlobalLibDir", include: "*.jar")
-
-    providedCompile files(
-        "$liferay.appServerPortalDir/WEB-INF/lib/util-java.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/util-bridges.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/util-taglib.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/commons-logging.jar",
-
-        "$liferay.appServerPortalDir/WEB-INF/lib/asm.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/aopalliance.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/cglib.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/spring-aop.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/spring-asm.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/spring-beans.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/spring-context.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/spring-core.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/spring-expression.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/spring-web.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/spring-web-servlet.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/spring-web-portlet.jar",
-
-        "$liferay.appServerPortalDir/WEB-INF/lib/json-java.jar",
-
-        "$liferay.appServerPortalDir/WEB-INF/lib/jstl-api.jar",
-        "$liferay.appServerPortalDir/WEB-INF/lib/jstl-impl.jar"
-    )
-
-    serviceCompile files("$liferay.appServerGlobalLibDir/portal-service.jar")
-
+task jarClasses(type:Jar) {
+    from(sourceSets.main.output) {
+        include "**/*.class"
+    }
+    from (zipTree(configurations.compile.find { it.name.startsWith("scala-library")})) {
+        exclude "META-INF/*"
+    }
 }
+
+task proguard(type: proguard.gradle.ProGuardTask, dependsOn: 'jarClasses') {
+    ext {
+        outDir = file("${buildDir}/proguard")
+        shrunkenJar = "${outDir}/${archivesBaseName}-${version}.jar"
+    }
+    outDir.mkdirs()
+
+    injars jarClasses.archivePath
+    outjars shrunkenJar
+    libraryjars files(jarService.archivePath) + configurations.serviceCompile + configurations.providedCompile
+
+    configuration "proguard.cfg"
+}
+
+task shrinkWar(type: Jar, dependsOn: [proguard, 'war']) {
+    destinationDir = proguard.outDir
+    includeEmptyDirs = false
+    extension = 'war'
+
+    from (zipTree(war.archivePath)) {
+        exclude "WEB-INF/classes/**/*.class"
+        exclude "WEB-INF/lib/scala-library*"
+    }
+
+    from (file(proguard.shrunkenJar)) {
+        into "WEB-INF/lib"
+    }
+}
+
+if (isReleaseVersion) {
+    deploy.dependsOn 'shrinkWar'
+}
+
+sassToCss.enabled = false
