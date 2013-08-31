@@ -29,7 +29,7 @@ version = '1.0.0.3'
 sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
-ext.isReleaseVersion = !version.endsWith("SNAPSHOT")
+ext.proguardEnabled = true
 
 sourceSets {
     main {
@@ -147,8 +147,11 @@ task shrinkWar(type: Jar, dependsOn: [proguard, 'war']) {
     }
 }
 
-if (isReleaseVersion) {
-    deploy.dependsOn 'shrinkWar'
+if (proguardEnabled) {
+    deploy {
+        dependsOn 'shrinkWar'
+        warFile = file("${proguard.outDir}/${archivesBaseName}-${version}.war")
+    }
 }
 
 sassToCss.enabled = false
