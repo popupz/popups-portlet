@@ -30,6 +30,7 @@ sourceCompatibility = 1.6
 targetCompatibility = 1.6
 
 ext.proguardEnabled = true
+ext.serviceBuildNumber = 61 // increment this number every time you make changes to service.xml that requires database changes
 
 sourceSets {
     main {
@@ -60,7 +61,7 @@ dependencies {
     providedCompile 'javax.servlet:servlet-api:2.5'
     providedCompile 'javax.servlet.jsp:jsp-api:2.1'
 
-    providedCompile fileTree(dir: "$liferay.appServerGlobalLibDir", include: "*.jar", exclude: ["activation.jar", "jta.jar"])
+    providedCompile fileTree(dir: "$liferay.appServerGlobalLibDir", include: '*.jar', exclude: ['activation.jar', 'jta.jar'])
 
     providedCompile files(
             "$liferay.appServerPortalDir/WEB-INF/lib/util-java.jar",
@@ -102,38 +103,47 @@ compileJava {
 
 compileScala {
     scalaCompileOptions.useCompileDaemon = true
-    scalaCompileOptions.daemonServer = "localhost:3200"
+    scalaCompileOptions.daemonServer = 'localhost:3200'
 }
 
 tasks.withType(ScalaCompile) {
     scalaCompileOptions.useAnt = false
 }
 
-task proguard(type: proguard.gradle.ProGuardTask, dependsOn: ["war"]) {
+generateService {
+    doLast {
+        ext {
+            servicePropertiesFile = file("src/main/scala/service.properties")
+        }
+        servicePropertiesFile.write(servicePropertiesFile.text.replaceAll('build.number=([0-9]+)', "build.number=${serviceBuildNumber}"));
+    }
+}
+
+task proguard(type: proguard.gradle.ProGuardTask, dependsOn: ['war']) {
     ext {
         outDir = file("${buildDir}/proguard")
         shrunkenJar = "${outDir}/${archivesBaseName}-${version}.jar"
-        scalaJar = configurations.compile.find { it.name.startsWith("scala-library")}
+        scalaJar = configurations.compile.find { it.name.startsWith('scala-library') }
     }
     injars sourceSets.main.output.classesDir
     injars scalaJar
     outjars shrunkenJar
     libraryjars configurations.compile - files(scalaJar) + configurations.serviceCompile + configurations.providedCompile
-    configuration "proguard.cfg"
+    configuration 'proguard.cfg'
 }
 
-task shrinkWar(type: Jar, dependsOn: ["proguard"]) {
+task shrinkWar(type: Jar, dependsOn: ['proguard']) {
     destinationDir = proguard.outDir
     includeEmptyDirs = false
     extension = 'war'
 
     from (zipTree(war.archivePath)) {
-        exclude "WEB-INF/classes/**/*.class"
-        exclude "WEB-INF/lib/scala-library*"
+        exclude 'WEB-INF/classes/**/*.class'
+        exclude 'WEB-INF/lib/scala-library*'
     }
 
     from (file(proguard.shrunkenJar)) {
-        into "WEB-INF/lib"
+        into 'WEB-INF/lib'
     }
 }
 
@@ -144,9 +154,9 @@ if (proguardEnabled) {
     }
 }
 
-if (file(".").getName() != "popups-portlet") {
-    throw new GradleException("Project must be checked out to a directory called popups-portlet or " +
-            "Liferay's servicebuiler wont be able to generate the correct classes")
+if (file('.').getName() != 'popups-portlet') {
+    throw new GradleException('Project must be checked out to a directory called popups-portlet or ' +
+            'servicebuilder wont be able to generate the correct classes')
 }
 
 sassToCss.enabled = false
