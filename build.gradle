@@ -154,4 +154,9 @@ if (proguardEnabled) {
     }
 }
 
+if (file(".").getName() != "popups-portlet") {
+    throw new GradleException("Project must be checked out to a directory called popups-portlet or " +
+            "Liferay's servicebuiler wont be able to generate the correct classes")
+}
+
 sassToCss.enabled = false
