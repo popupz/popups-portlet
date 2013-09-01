@@ -150,7 +150,7 @@ task shrinkWar(type: Jar, dependsOn: [proguard, 'war']) {
 if (proguardEnabled) {
     deploy {
         dependsOn 'shrinkWar'
-        warFile = file("${proguard.outDir}/${archivesBaseName}-${version}.war")
+        warFile = file(shrinkWar.archivePath)
     }
 }
 
