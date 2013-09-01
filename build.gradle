@@ -113,13 +113,12 @@ task proguard(type: proguard.gradle.ProGuardTask, dependsOn: ["war"]) {
     ext {
         outDir = file("${buildDir}/proguard")
         shrunkenJar = "${outDir}/${archivesBaseName}-${version}.jar"
+        scalaJar = configurations.compile.find { it.name.startsWith("scala-library")}
     }
-    outDir.mkdirs()
     injars sourceSets.main.output.classesDir
-    injars configurations.compile.find { it.name.startsWith("scala-library")}
+    injars scalaJar
     outjars shrunkenJar
-    libraryjars files(jarService.archivePath) + configurations.serviceCompile + configurations.providedCompile
-
+    libraryjars configurations.compile - files(scalaJar) + configurations.serviceCompile + configurations.providedCompile
     configuration "proguard.cfg"
 }
 
