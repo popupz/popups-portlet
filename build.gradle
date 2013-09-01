@@ -109,30 +109,21 @@ tasks.withType(ScalaCompile) {
     scalaCompileOptions.useAnt = false
 }
 
-task jarClasses(type:Jar) {
-    from(sourceSets.main.output) {
-        include "**/*.class"
-    }
-    from (zipTree(configurations.compile.find { it.name.startsWith("scala-library")})) {
-        exclude "META-INF/*"
-    }
-}
-
-task proguard(type: proguard.gradle.ProGuardTask, dependsOn: 'jarClasses') {
+task proguard(type: proguard.gradle.ProGuardTask, dependsOn: ["war"]) {
     ext {
         outDir = file("${buildDir}/proguard")
         shrunkenJar = "${outDir}/${archivesBaseName}-${version}.jar"
     }
     outDir.mkdirs()
-
-    injars jarClasses.archivePath
+    injars sourceSets.main.output.classesDir
+    injars configurations.compile.find { it.name.startsWith("scala-library")}
     outjars shrunkenJar
     libraryjars files(jarService.archivePath) + configurations.serviceCompile + configurations.providedCompile
 
     configuration "proguard.cfg"
 }
 
-task shrinkWar(type: Jar, dependsOn: [proguard, 'war']) {
+task shrinkWar(type: Jar, dependsOn: ["proguard"]) {
     destinationDir = proguard.outDir
     includeEmptyDirs = false
     extension = 'war'
