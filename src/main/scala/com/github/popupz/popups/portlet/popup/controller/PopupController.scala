@@ -154,7 +154,7 @@ class PopupController(popupLocalService: PopupLocalService,
     userLocalService.hasRoleUser(regularRoleId, themeDisplay.getUserId)
   }
 
-  def hasSiteRole(config:JSONObject)(renderRequest: RenderRequest) = {
+  private def hasSiteRole(config:JSONObject)(renderRequest: RenderRequest) = {
     val siteRoleId = config.getLong("siteRoleId")
     val themeDisplay = getThemeDisplay(renderRequest)
     userGroupRoleLocalService.hasUserGroupRole(themeDisplay.getUserId, themeDisplay.getScopeGroupId, siteRoleId)
