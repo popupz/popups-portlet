@@ -29,7 +29,8 @@ class PopupController(popupLocalService: PopupLocalService,
 
   @RenderMapping
   def view(renderRequest: RenderRequest, themeDisplay: ThemeDisplay) = {
-    val popups = popupLocalService.getPopupsByGroupId(themeDisplay.getScopeGroupId)
+    val scopeGroupId = themeDisplay.getLayout.getGroup.getGroupId // don't use themeDisplay.getScopeGroupId it returns the wrong value in the control panel
+    val popups = popupLocalService.getPopupsByGroupId(scopeGroupId)
                   .filter(rulesMatch(_)(renderRequest))
                   .filter(hasNotBeenViewed(_)(renderRequest))
                   .asJava
