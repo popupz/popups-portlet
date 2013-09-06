@@ -29,14 +29,30 @@ class PopupController(popupLocalService: PopupLocalService,
 
   @RenderMapping
   def view(renderRequest: RenderRequest, themeDisplay: ThemeDisplay) = {
-    val scopeGroupId = themeDisplay.getLayout.getGroup.getGroupId // don't use themeDisplay.getScopeGroupId it returns the wrong value in the control panel
-    val popups = popupLocalService.getPopupsByGroupId(scopeGroupId)
-                  .filter(rulesMatch(_)(renderRequest))
-                  .filter(hasNotBeenViewed(_)(renderRequest))
-                  .asJava
+
+    // in lr 6.1.2-ce-ga3 portlets defined in layout.static.portlets.all are also rendered in the control panel
+
+    val group = themeDisplay.getLayout.getGroup
+
+    val popups = group.isControlPanel match {
+      case true => Seq[Popup]()
+      case false => {
+        val scopeGroupId = group.getGroupId
+        val companyGroupId = groupLocalService.getCompanyGroup(themeDisplay.getCompanyId).getGroupId
+
+        val scopeGroupPopups = popupLocalService.getPopupsByGroupId(scopeGroupId)
+        val companyPopups = popupLocalService.getPopupsByGroupId(companyGroupId)
+
+        val allPopups = scopeGroupPopups ++ companyPopups
+
+        allPopups
+          .filter(rulesMatch(_)(renderRequest))
+          .filter(hasNotBeenViewed(_)(renderRequest))
+      }
+    }
 
     new ModelAndView("popup")
-      .addObject("popups", popups)
+      .addObject("popups", popups.asJava)
   }
 
   private def hasNotBeenViewed(popup: Popup)(renderRequest: RenderRequest) = {
