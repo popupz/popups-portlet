@@ -8,6 +8,14 @@
     margin-bottom: 5px;
 }
 
+.rule-error {
+    visibility: hidden;
+}
+
+.error .rule-error {
+    visibility: visible;
+}
+
 .column {
     display: table-cell;
 }

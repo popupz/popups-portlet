@@ -24,7 +24,9 @@ AUI.add('ac-selectbox', function(A) {
                 return response.name;
             },
             requestTemplate: '&q={query}'
-        })
+        });
+
+        this.set(SELECTION, config.selection);
     }
 
     A.extend(ACSelectionPlugin, A.AutoCompleteList, {

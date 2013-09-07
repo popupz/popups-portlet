@@ -10,7 +10,7 @@ import controller.{ReferenceDataController, DeletePopupController, PopupControll
 import com.github.popupz.popups.service.{PopupLocalServiceUtil, PopupServiceUtil}
 import org.springframework.web.portlet.mvc.annotation.AnnotationMethodHandlerAdapter
 import com.github.popupz.popups.portlet.{JsonView, ServiceContextArgumentResolver, ThemeDisplayArgumentResolver}
-import com.liferay.portal.service.OrganizationLocalServiceUtil
+import com.liferay.portal.service.{UserGroupLocalServiceUtil, RoleLocalServiceUtil, OrganizationLocalServiceUtil}
 
 @Configuration
 class AdminPortletConfiguration {
@@ -54,7 +54,7 @@ class AdminPortletConfiguration {
   def json = new JsonView
 
   @Bean
-  def popupController = new PopupController(popupService, popupLocalService)
+  def popupController = new PopupController(popupService, popupLocalService, organisationLocalService, roleLocalService, userGroupLocalService)
 
   @Bean
   def popupListController = new PopupListController(popupLocalService)
@@ -73,5 +73,11 @@ class AdminPortletConfiguration {
 
   @Bean
   def organisationLocalService = OrganizationLocalServiceUtil.getService
+
+  @Bean
+  def roleLocalService = RoleLocalServiceUtil.getService
+
+  @Bean
+  def userGroupLocalService = UserGroupLocalServiceUtil.getService
 
 }

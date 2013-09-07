@@ -9,27 +9,35 @@ import javax.portlet.{ActionResponse, ActionRequest}
 import com.liferay.portal.kernel.servlet.SessionMessages
 import com.github.popupz.popups.service.{PopupLocalService, PopupService}
 import org.springframework.web.portlet.ModelAndView
-import com.liferay.portal.service.ServiceContext
+import com.liferay.portal.service._
 import com.github.popupz.popups.model.impl.PopupImpl
 import com.github.popupz.popups.model.Popup
 import com.liferay.portal.theme.ThemeDisplay
+import org.json.{JSONArray, JSONObject}
+import annotation.tailrec
+import scala.collection.JavaConverters._
 
 @RequestMapping(Array("VIEW"))
-class PopupController (popupService: PopupService, popupLocalService: PopupLocalService) {
+class PopupController (popupService: PopupService,
+                       popupLocalService: PopupLocalService,
+                       organizationLocalService: OrganizationLocalService,
+                       roleLocalService: RoleLocalService,
+                       userGroupLocalService: UserGroupLocalService) {
 
   @ModelAttribute("popup")
   def formBean(@RequestParam(defaultValue="0") popupId: Long) = {
-    popupId match {
+    val popup = popupId match {
       case id if id > 0 => popupLocalService.getPopup(id)
       case _ => {
         val popup = new PopupImpl()
-        popup.setRules("""{"condition-type":"any","rules":[{"rule-type":"on-public-pages"}]}""")
         popup.setDisplayType("once")
         popup.setWidth(650)
         popup.setNew(true)
         popup
       }
     }
+    popup.setRules(updatedRulesForPopup(popup))
+    popup
   }
 
   @RenderMapping(params = Array("view=popupForm"))
@@ -52,5 +60,82 @@ class PopupController (popupService: PopupService, popupLocalService: PopupLocal
       case _ => popupService.addPopup(popup.getTitle, popup.getContent, popup.getWidth, popup.getMustConfirm, popup.getDisplayType, popup.getRules, serviceContext)
     }
     response.sendRedirect(redirect)
+  }
+
+  private def updatedRulesForPopup(popup:Popup) = popup.isNew match {
+    case true => """{"condition-type":"any","rules":[{"rule-type":"on-public-pages"}]}"""
+    case _ => {
+
+      @tailrec
+      def loop(rulesArray: JSONArray, index: Integer, collector: Seq[JSONObject]): JSONArray = {
+        if (index == rulesArray.length()) {
+          new JSONArray(collector.asJava)
+        } else {
+          val config = rulesArray.getJSONObject(index)
+
+          val rule = config.get("rule-type") match {
+            case "user-is-a-member-of-organisation" => updateMemberOfOrganisationRule(config)
+            case "user-is-a-member-of-user-group" => updateisMemberOfUsergroupRule(config)
+            case "user-has-regular-role" => updateUserHasRegularRoleRule(config)
+            case "user-has-site-role" => userHasSiteRoleRUle(config)
+            case _ => config
+          }
+
+          loop(rulesArray, index + 1, collector :+ rule)
+        }
+      }
+      val json = new JSONObject(popup.getRules)
+      json.put("rules", loop(json.getJSONArray("rules"), 0, Seq()))
+      json.toString
+    }
+  }
+
+  private def updateMemberOfOrganisationRule(config: JSONObject) = getLong(config, "organizationId", 0) match {
+    case id if id > 0 => Option (organizationLocalService.fetchOrganization(id)) match {
+      case Some(organization) => copy(config).put("organization", organization.getName)
+      case _ => markAsInvalid(config)
+    }
+    case _ => config
+  }
+
+  private def updateisMemberOfUsergroupRule(config: JSONObject) = getLong(config, "userGroupId", 0) match {
+    case id if id > 0 => Option (userGroupLocalService.fetchUserGroup(id)) match {
+      case Some(userGroup) => copy(config).put("userGroup", userGroup.getName)
+      case _ => markAsInvalid(config)
+    }
+    case _ => config
+  }
+
+  private def updateUserHasRegularRoleRule(config: JSONObject) = getLong(config, "regularRoleId", 0) match {
+    case id if id > 0 => Option (roleLocalService.fetchRole(id)) match {
+      case Some(role) => copy(config).put("regularRole", role.getName)
+      case _ => markAsInvalid(config)
+    }
+    case _ => config
+  }
+
+  private def userHasSiteRoleRUle(config: JSONObject) = getLong(config, "siteRoleId", 0) match  {
+    case id if id > 0 => Option (roleLocalService.fetchRole(id)) match {
+      case Some(role) => copy(config).put("siteRole", role.getName)
+      case _ => markAsInvalid(config)
+    }
+    case _ => config
+  }
+
+  private def getLong(jsonObject: JSONObject, key: String, default: Long): java.lang.Long = {
+    val value = jsonObject.getString(key)
+    try {
+      java.lang.Long.valueOf(value)
+    } catch {
+      case e: NumberFormatException => default
+    }
+  }
+
+  private def copy(jsonObject: JSONObject) = new JSONObject(jsonObject, JSONObject.getNames(jsonObject))
+
+  private def markAsInvalid(jsonObject: JSONObject) =  {
+    val result = copy(jsonObject)
+    result.put("invalid", "true")
+    result
   }
 }

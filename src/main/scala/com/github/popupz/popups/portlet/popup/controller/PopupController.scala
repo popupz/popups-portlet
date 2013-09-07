@@ -160,26 +160,35 @@ class PopupController(popupLocalService: PopupLocalService,
   }
 
   private def memberOfOrganisation(config:JSONObject)(renderRequest: RenderRequest): Boolean = {
-    val organizationId = config.getLong("organizationId")
+    val organizationId = getLong(config, "organizationId", 0)
     val themeDisplay = getThemeDisplay(renderRequest)
     organizationLocalService.hasUserOrganization(themeDisplay.getUserId, organizationId)
   }
 
   private def hasRegularRole(config:JSONObject)(renderRequest: RenderRequest) = {
-    val regularRoleId = config.getLong("regularRoleId")
+    val regularRoleId = getLong(config, "regularRoleId", 0)
     val themeDisplay = getThemeDisplay(renderRequest)
     userLocalService.hasRoleUser(regularRoleId, themeDisplay.getUserId)
   }
 
   private def hasSiteRole(config:JSONObject)(renderRequest: RenderRequest) = {
-    val siteRoleId = config.getLong("siteRoleId")
+    val siteRoleId = getLong(config, "siteRoleId", 0)
     val themeDisplay = getThemeDisplay(renderRequest)
     userGroupRoleLocalService.hasUserGroupRole(themeDisplay.getUserId, themeDisplay.getScopeGroupId, siteRoleId)
   }
 
   private def memberOfUserGroup(config:JSONObject)(renderRequest: RenderRequest): Boolean = {
-    val userGroupId = config.getLong("userGroupId")
+    val userGroupId = getLong(config, "userGroupId", 0)
     val themeDisplay = getThemeDisplay(renderRequest)
     userLocalService.hasUserGroupUser(userGroupId, themeDisplay.getUserId)
+  }
+
+  private def getLong(jsonObject: JSONObject, key: String, default: Long): java.lang.Long = {
+    val value = jsonObject.getString(key)
+    try {
+      return java.lang.Long.valueOf(value)
+    } catch {
+      case e: NumberFormatException => default
+    }
   }
 }

@@ -18,7 +18,7 @@
             userId: ${themeDisplay.userId},
             groupId: ${themeDisplay.scopeGroupId},
             companyId: ${themeDisplay.companyId}
-        }
+        };
 
         <c:forEach var="popup" items="${popups}">
 

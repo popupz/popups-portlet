@@ -101,6 +101,7 @@
 
 <c:set var="buttonsColumn">
     <div class="column last">
+        <liferay-ui:icon cssClass="rule-error" image="../messages/alert" alt="invalid-rule" />
         <liferay-ui:icon cssClass="repeatable-field-add" image="add"/>
         <liferay-ui:icon cssClass="repeatable-field-delete" image="delete"/>
     </div>
@@ -225,7 +226,11 @@
             var rowNode = A.Node.create(rowTemplate);
 
             for (var fieldName in ruleData) {
-                rowNode.one('*[name="${renderResponse.namespace}' + fieldName + '"]').set('value', ruleData[fieldName])
+                if (fieldName == 'invalid') {
+                    rowNode.addClass('error');
+                } else {
+                    rowNode.one('*[name="${renderResponse.namespace}' + fieldName + '"]').set('value', ruleData[fieldName])
+                }
             }
 
             A.one('#${renderResponse.namespace}rules-fieldset').append(rowNode);
@@ -264,6 +269,7 @@
 
         rulesContainer.delegate('focus', function (e) {
             var inputField = e.currentTarget;
+            var ruleDiv = e.currentTarget.ancestor("div.rule");
 
             if (inputField.as) {
                 return;
@@ -271,8 +277,11 @@
             var inputFieldName = inputField.get('name');
             var hiddenInputFieldName = inputFieldName + "Id";
 
+            var hiddenInputField = A.one('input[name="' + hiddenInputFieldName + '"]');
+
             inputField.plug(A.Plugin.ACSelection, {
-                dataUrl: inputField.getAttribute('dataUrl')
+                dataUrl: inputField.getAttribute('dataUrl'),
+                selection: hiddenInputField.get('value')
             });
 
             // workaround for http://yuilibrary.com/projects/yui3/ticket/2531651
@@ -281,8 +290,8 @@
             }
 
             inputField.as.on('selectionChange', function (e) {
-                var hiddenInputField = A.one('input[name="' + hiddenInputFieldName + '"]');
                 hiddenInputField.set('value', e.newVal);
+                ruleDiv.removeClass('error');
             });
         }, '.selectbox');
 
