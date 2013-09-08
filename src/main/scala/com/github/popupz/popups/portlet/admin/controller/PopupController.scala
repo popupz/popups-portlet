@@ -90,44 +90,44 @@ class PopupController (popupService: PopupService,
     }
   }
 
-  private def updateMemberOfOrganisationRule(config: JSONObject) = getLong(config, "organizationId", 0) match {
-    case id if id > 0 => Option (organizationLocalService.fetchOrganization(id)) match {
+  private def updateMemberOfOrganisationRule(config: JSONObject) = getLong(config, "organizationId") match {
+    case Some(id) => Option (organizationLocalService.fetchOrganization(id)) match {
       case Some(organization) => copy(config).put("organization", organization.getName)
       case _ => markAsInvalid(config)
     }
     case _ => config
   }
 
-  private def updateIsMemberOfUsergroupRule(config: JSONObject) = getLong(config, "userGroupId", 0) match {
-    case id if id > 0 => Option (userGroupLocalService.fetchUserGroup(id)) match {
+  private def updateIsMemberOfUsergroupRule(config: JSONObject) = getLong(config, "userGroupId") match {
+    case Some(id) => Option (userGroupLocalService.fetchUserGroup(id)) match {
       case Some(userGroup) => copy(config).put("userGroup", userGroup.getName)
       case _ => markAsInvalid(config)
     }
     case _ => config
   }
 
-  private def updateUserHasRegularRoleRule(config: JSONObject) = getLong(config, "regularRoleId", 0) match {
-    case id if id > 0 => Option (roleLocalService.fetchRole(id)) match {
+  private def updateUserHasRegularRoleRule(config: JSONObject) = getLong(config, "regularRoleId") match {
+    case Some(id) => Option (roleLocalService.fetchRole(id)) match {
       case Some(role) => copy(config).put("regularRole", role.getName)
       case _ => markAsInvalid(config)
     }
     case _ => config
   }
 
-  private def updateUserHasSiteRoleRule(config: JSONObject) = getLong(config, "siteRoleId", 0) match  {
-    case id if id > 0 => Option (roleLocalService.fetchRole(id)) match {
+  private def updateUserHasSiteRoleRule(config: JSONObject) = getLong(config, "siteRoleId") match  {
+    case Some(id) => Option (roleLocalService.fetchRole(id)) match {
       case Some(role) => copy(config).put("siteRole", role.getName)
       case _ => markAsInvalid(config)
     }
     case _ => config
   }
 
-  private def getLong(jsonObject: JSONObject, key: String, default: Long): java.lang.Long = {
+  private def getLong(jsonObject: JSONObject, key: String) = {
     val value = jsonObject.getString(key)
     try {
-      java.lang.Long.valueOf(value)
+      Some(java.lang.Long.valueOf(value))
     } catch {
-      case e: NumberFormatException => default
+      case e: NumberFormatException => None
     }
   }
 

@@ -159,36 +159,44 @@ class PopupController(popupLocalService: PopupLocalService,
     themeDisplay.getLayoutSet.getPrivateLayout
   }
 
-  private def memberOfOrganisation(config:JSONObject)(renderRequest: RenderRequest): Boolean = {
-    val organizationId = getLong(config, "organizationId", 0)
-    val themeDisplay = getThemeDisplay(renderRequest)
-    organizationLocalService.hasUserOrganization(themeDisplay.getUserId, organizationId)
+  private def memberOfOrganisation(config:JSONObject)(renderRequest: RenderRequest) = getLong(config, "organizationId") match {
+    case Some(organizationId) => {
+      val themeDisplay = getThemeDisplay(renderRequest)
+      organizationLocalService.hasUserOrganization(themeDisplay.getUserId, organizationId)
+    }
+    case _ => false
   }
 
-  private def hasRegularRole(config:JSONObject)(renderRequest: RenderRequest) = {
-    val regularRoleId = getLong(config, "regularRoleId", 0)
-    val themeDisplay = getThemeDisplay(renderRequest)
-    userLocalService.hasRoleUser(regularRoleId, themeDisplay.getUserId)
+  private def hasRegularRole(config:JSONObject)(renderRequest: RenderRequest) = getLong(config, "regularRoleId") match {
+    case Some(regularRoleId) => {
+      val themeDisplay = getThemeDisplay(renderRequest)
+      userLocalService.hasRoleUser(regularRoleId, themeDisplay.getUserId)
+    }
+    case _ => false
   }
 
-  private def hasSiteRole(config:JSONObject)(renderRequest: RenderRequest) = {
-    val siteRoleId = getLong(config, "siteRoleId", 0)
-    val themeDisplay = getThemeDisplay(renderRequest)
-    userGroupRoleLocalService.hasUserGroupRole(themeDisplay.getUserId, themeDisplay.getScopeGroupId, siteRoleId)
+  private def hasSiteRole(config:JSONObject)(renderRequest: RenderRequest) = getLong(config, "siteRoleId") match {
+    case Some(siteRoleId) => {
+      val themeDisplay = getThemeDisplay(renderRequest)
+      userGroupRoleLocalService.hasUserGroupRole(themeDisplay.getUserId, themeDisplay.getScopeGroupId, siteRoleId)
+    }
+    case _ => false
   }
 
-  private def memberOfUserGroup(config:JSONObject)(renderRequest: RenderRequest): Boolean = {
-    val userGroupId = getLong(config, "userGroupId", 0)
-    val themeDisplay = getThemeDisplay(renderRequest)
-    userLocalService.hasUserGroupUser(userGroupId, themeDisplay.getUserId)
+  private def memberOfUserGroup(config:JSONObject)(renderRequest: RenderRequest) = getLong(config, "userGroupId") match {
+    case Some(userGroupId) => {
+      val themeDisplay = getThemeDisplay(renderRequest)
+      userLocalService.hasUserGroupUser(userGroupId, themeDisplay.getUserId)
+    }
+    case _ => false
   }
 
-  private def getLong(jsonObject: JSONObject, key: String, default: Long): java.lang.Long = {
+  private def getLong(jsonObject: JSONObject, key: String) = {
     val value = jsonObject.getString(key)
     try {
-      return java.lang.Long.valueOf(value)
+      Some(java.lang.Long.valueOf(value))
     } catch {
-      case e: NumberFormatException => default
+      case e: NumberFormatException => None
     }
   }
 }
