@@ -75,9 +75,9 @@ class PopupController (popupService: PopupService,
 
           val rule = config.get("rule-type") match {
             case "user-is-a-member-of-organisation" => updateMemberOfOrganisationRule(config)
-            case "user-is-a-member-of-user-group" => updateisMemberOfUsergroupRule(config)
+            case "user-is-a-member-of-user-group" => updateIsMemberOfUsergroupRule(config)
             case "user-has-regular-role" => updateUserHasRegularRoleRule(config)
-            case "user-has-site-role" => userHasSiteRoleRUle(config)
+            case "user-has-site-role" => updateUserHasSiteRoleRule(config)
             case _ => config
           }
 
@@ -98,7 +98,7 @@ class PopupController (popupService: PopupService,
     case _ => config
   }
 
-  private def updateisMemberOfUsergroupRule(config: JSONObject) = getLong(config, "userGroupId", 0) match {
+  private def updateIsMemberOfUsergroupRule(config: JSONObject) = getLong(config, "userGroupId", 0) match {
     case id if id > 0 => Option (userGroupLocalService.fetchUserGroup(id)) match {
       case Some(userGroup) => copy(config).put("userGroup", userGroup.getName)
       case _ => markAsInvalid(config)
@@ -114,7 +114,7 @@ class PopupController (popupService: PopupService,
     case _ => config
   }
 
-  private def userHasSiteRoleRUle(config: JSONObject) = getLong(config, "siteRoleId", 0) match  {
+  private def updateUserHasSiteRoleRule(config: JSONObject) = getLong(config, "siteRoleId", 0) match  {
     case id if id > 0 => Option (roleLocalService.fetchRole(id)) match {
       case Some(role) => copy(config).put("siteRole", role.getName)
       case _ => markAsInvalid(config)
