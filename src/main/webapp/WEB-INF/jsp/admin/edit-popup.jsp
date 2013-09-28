@@ -25,7 +25,7 @@
                 </script>
 
                 <aui:field-wrapper label="popup-message">
-                    <liferay-ui:input-editor width="100%"/>
+                    <liferay-ui:input-editor width="100%" toolbarSet="popups" />
 
                     <aui:input name="${status.expression}" type="hidden"/>
                 </aui:field-wrapper>
