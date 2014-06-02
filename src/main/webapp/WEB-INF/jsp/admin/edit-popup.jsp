@@ -10,6 +10,7 @@
 </liferay-portlet:actionURL>
 
 <aui:form action="${actionUrl}" method="post" name="fm">
+
     <aui:fieldset>
         <spring:nestedPath path="popup">
 
@@ -43,36 +44,47 @@
 
                 <c:set var="displayType">
                     <spring:bind path="displayType" htmlEscape="true">
-                        <aui:select name="${status.expression}" inlineField="true" label="">
-                            <aui:option label="once" value="once" selected="${status.value eq 'once'}"/>
-                            <aui:option label="every-visit" value="every-visit" selected="${status.value eq 'every-visit'}"/>
-                        </aui:select>
+                        <select name="${renderResponse.namespace}displayType" class="aui-field-input aui-field-input-select aui-field-input-menu">
+                            <option value="once"
+                                    <c:if test="${status.value eq 'once'}">
+                                        selected
+                                    </c:if>
+                                    >
+                                <liferay-ui:message key="once"/>
+                            </option>
+                            <option value="every-visit"
+                                    <c:if test="${status.value eq 'every-visit'}">
+                                        selected
+                                    </c:if>
+                                    >
+                                <liferay-ui:message key="every-visit"/> </option>
+                        </select>
                     </spring:bind>
                 </c:set>
 
                 <spring:bind path="rules" htmlEscape="true">
-                    <input type="hidden" name="${status.expression}" value="${status.value}"/>
+                    <input type="hidden" name="${renderResponse.namespace}${status.expression}" value="${status.value}"/>
                 </spring:bind>
 
                 <c:set var="conditionType">
-                    <aui:select name="condition-type" inlineField="true" label="">
-                        <aui:option label="any" value="any"/>
-                        <aui:option label="all" value="all"/>
-                    </aui:select>
+                    <select name="${renderResponse.namespace}condition-type" class="aui-field-input aui-field-input-select aui-field-input-menu">
+                        <option value="any"> <liferay-ui:message key="any"/> </option>
+                        <option value="all"> <liferay-ui:message key="all"/> </option>
+                    </select>
                 </c:set>
 
                 <spring:message code="display-if-x-of-the-following-conditions-are-met" arguments="${displayType},${conditionType}"/>
 
-                <div class="rules-set">
-                    <aui:fieldset id="rules-fieldset">
-                    </aui:fieldset>
+                <div id="${renderResponse.namespace}rules-set" class="rules-set">
+
                 </div>
+
             </aui:field-wrapper>
 
 
             <aui:button-row>
-                <aui:button type="submit" inputCssClass="main"/>
-                <aui:button inputCssClass="preview" value="preview"/>
+                <aui:button type="submit" cssClass="submit-button"/>
+                <aui:button cssClass="preview-button" value="preview"/>
                 <aui:button href="${redirect}" value="cancel"/>
             </aui:button-row>
         </spring:nestedPath>
@@ -80,99 +92,50 @@
 </aui:form>
 
 
-<c:set var="rulesDropdownColumn">
-
-    <div class="column">
-        <aui:select name="rule-type" inlineField="true" label="" inputCssClass="ruletype">
-            <aui:option label="on-public-pages" value="on-public-pages"/>
-            <aui:option label="on-private-pages" value="on-private-pages"/>
-            <aui:option label="page-url" value="page-url"/>
-            <aui:option label="user-is-logged-in" value="user-is-logged-in"/>
-            <aui:option label="user-is-a-member-of-organisation" value="user-is-a-member-of-organisation"/>
-            <aui:option label="user-is-a-member-of-user-group" value="user-is-a-member-of-user-group" />
-            <aui:option label="user-has-regular-role" value="user-has-regular-role" />
-            <aui:option label="user-has-site-role" value="user-has-site-role" />
-            <%--
-                <aui:option label="user-has-organization-role" value="user-has-organization-role" />
-            --%>
-        </aui:select>
-    </div>
-</c:set>
-
-<c:set var="buttonsColumn">
-    <div class="column last">
-        <liferay-ui:icon cssClass="rule-error" image="../messages/alert" alt="invalid-rule" />
-        <liferay-ui:icon cssClass="repeatable-field-add" image="add"/>
-        <liferay-ui:icon cssClass="repeatable-field-delete" image="delete"/>
-    </div>
-</c:set>
-
 <script id="${renderResponse.namespace}on-public-pages-template" type="text/x-template">
-    <div class="rule">
-        ${rulesDropdownColumn}
-        ${buttonsColumn}
-    </div>
+    <popups:rule/>
 </script>
 
 <script id="${renderResponse.namespace}on-private-pages-template" type="text/x-template">
-    <div class="rule">
-        ${rulesDropdownColumn}
-        ${buttonsColumn}
-    </div>
+    <popups:rule/>
 </script>
 
 <script id="${renderResponse.namespace}page-url-template" type="text/x-template">
-    <div class="rule">
-        ${rulesDropdownColumn}
-
-        <div class="column">
-            <aui:select name="match-type" inlineField="true" label="" cssClass="rule2">
-                <aui:option label="equals" value="equals"/>
-                <aui:option label="starts-with" value="starts-with"/>
-                <aui:option label="ends-with" value="ends-with"/>
-                <aui:option label="matches-regular-expression" value="matches-regular-expression"/>
-            </aui:select>
+    <popups:rule>
+        <div class="url-match-type">
+            <select class="aui-field-input aui-field-input-select aui-field-input-menu" id="${renderResponse.namespace}match-type" name="${renderResponse.namespace}match-type">
+                <option value="equals"> <liferay-ui:message key="equals"/> </option>
+                <option value="starts-with"> <liferay-ui:message key="starts-with"/> </option>
+                <option value="ends-with"> <liferay-ui:message key="ends-with"/> </option>
+                <option value="matches-regular-expression"> <liferay-ui:message key="matches-regular-expression"/> </option>
+            </select>
         </div>
-
-        <div class="column main">
-            <aui:input name="value" inlineField="true" label="" inputCssClass="expand" />
+        <div class="url-match-argument">
+            <input name="${renderResponse.namespace}value" class="field expand" type="text" />
         </div>
-
-        ${buttonsColumn}
-    </div>
+    </popups:rule>
 </script>
 
 <script id="${renderResponse.namespace}user-is-logged-in-template" type="text/x-template">
-    <div class="rule">
-        ${rulesDropdownColumn}
-        ${buttonsColumn}
-    </div>
+    <popups:rule/>
 </script>
 
 <script id="${renderResponse.namespace}user-is-a-member-of-organisation-template" type="text/x-template">
     <liferay-portlet:resourceURL id="findOrganisations" var="findOrganisationUrl"/>
 
-    <div class="rule">
-        ${rulesDropdownColumn}
-        <div class="column main">
-            <aui:input name="organization" inlineField="true" label="" inputCssClass="selectbox expand" dataUrl="${findOrganisationUrl}" />
-            <aui:input name="organizationId" type="hidden"/>
-        </div>
-        ${buttonsColumn}
-    </div>
+    <popups:rule>
+        <input name="${renderResponse.namespace}organization" class="field expand selectbox" type="text" dataUrl="${findOrganisationUrl}" />
+        <input name="${renderResponse.namespace}organizationId" type="hidden"/>
+    </popups:rule>
 </script>
 
 <script id="${renderResponse.namespace}user-is-a-member-of-user-group-template" type="text/x-template">
     <liferay-portlet:resourceURL id="findUserGroups" var="findUserGroupsUrl"/>
 
-    <div class="rule">
-        ${rulesDropdownColumn}
-        <div class="column main">
-            <aui:input name="userGroup" inlineField="true" label="" inputCssClass="selectbox expand" dataUrl="${findUserGroupsUrl}" />
-            <aui:input name="userGroupId" type="hidden"/>
-        </div>
-        ${buttonsColumn}
-    </div>
+    <popups:rule>
+        <input name="${renderResponse.namespace}userGroup" class="field expand selectbox" type="text" dataUrl="${findUserGroupsUrl}" />
+        <input name="${renderResponse.namespace}userGroupId" type="hidden"/>
+    </popups:rule>
 </script>
 
 <script id="${renderResponse.namespace}user-has-regular-role-template" type="text/x-template">
@@ -180,14 +143,10 @@
         <liferay-portlet:param name="roleType" value="1"/>
     </liferay-portlet:resourceURL>
 
-    <div class="rule">
-        ${rulesDropdownColumn}
-        <div class="column main">
-            <aui:input name="regularRole" inlineField="true" label="" inputCssClass="selectbox expand" dataUrl="${findRegularRolesUrl}" />
-            <aui:input name="regularRoleId" type="hidden"/>
-        </div>
-        ${buttonsColumn}
-    </div>
+    <popups:rule>
+        <input name="${renderResponse.namespace}regularRole" class="field expand selectbox" type="text" dataUrl="${findRegularRolesUrl}" />
+        <input name="${renderResponse.namespace}regularRoleId" type="hidden"/>
+    </popups:rule>
 </script>
 
 <script id="${renderResponse.namespace}user-has-site-role-template" type="text/x-template">
@@ -195,27 +154,24 @@
         <liferay-portlet:param name="roleType" value="2"/>
     </liferay-portlet:resourceURL>
 
-    <div class="rule">
-        ${rulesDropdownColumn}
-        <div class="column main">
-            <aui:input name="siteRole" inlineField="true" label="" inputCssClass="selectbox expand" dataUrl="${findSiteRolesUrl}" />
-            <aui:input name="siteRoleId" type="hidden"/>
-        </div>
-        ${buttonsColumn}
-    </div>
+    <popups:rule>
+        <input name="${renderResponse.namespace}siteRole" class="field selectbox expand" type="text" dataUrl="${findSiteRolesUrl}" />
+        <input name="${renderResponse.namespace}siteRoleId" type="hidden"/>
+    </popups:rule>
 </script>
 
 <script type="text/javascript">
 
-    AUI().use('ac-selectbox', 'node', 'json-parse', 'json-stringify', 'plugin-popup', function (A) {
+    AUI().use('ac-selectbox', 'plugin-popup', 'node', 'json-parse', 'json-stringify', function (A) {
 
         var portletNamespace = '${renderResponse.namespace}';
         var popupForm = A.one('#${renderResponse.namespace}fm');
-        var rulesContainer = A.one('#${renderResponse.namespace}rules-fieldset');
+        var rulesContainer = A.one('#${renderResponse.namespace}rules-set');
 
-        var rulesSetJson = popupForm.one('input[name="rules"]').get('value');
+        var rulesSetJson = popupForm.one('input[name="${renderResponse.namespace}rules"]').get('value');
 
         var rulesSet = A.JSON.parse(rulesSetJson);
+
 
         popupForm.one('select[name="${renderResponse.namespace}condition-type"]').set('value',rulesSet['condition-type']);
 
@@ -233,22 +189,25 @@
                 }
             }
 
-            A.one('#${renderResponse.namespace}rules-fieldset').append(rowNode);
+            A.one('#${renderResponse.namespace}rules-set').append(rowNode);
         }
 
-        popupForm.one('input.preview').on('click', function (e) {
+        popupForm.one('.preview-button').on('click', function (e) {
             e.preventDefault();
 
-            new A.PopupDialog({
-                width: popupForm.one('input[name="${renderResponse.namespace}width"]').get('value'),
-                mustConfirm: popupForm.one('input[name="${renderResponse.namespace}mustConfirm"]').get('value') == 'true',
-                title: popupForm.one('input[name="${renderResponse.namespace}title"]').get('value'),
-                bodyContent: ${renderResponse.namespace}editor.getHTML(),
-                strings: {
-                    close: '<spring:message code="close"/>',
-                    confirm: '<spring:message code="confirm"/>'
-                }
-            }).render();
+            Popups.showPopup(
+                    {
+                        bodyContent: ${renderResponse.namespace}editor.getHTML(),
+                        title: popupForm.one('input[name="${renderResponse.namespace}title"]').get('value'),
+                        mustConfirm: popupForm.one('input[name="${renderResponse.namespace}mustConfirm"]').get('value') == 'true',
+                        width: popupForm.one('input[name="${renderResponse.namespace}width"]').get('value'),
+                        strings: {
+                            close: '<spring:message code="close"/>',
+                            confirm: '<spring:message code="confirm"/>'
+                        }
+                    }
+            );
+
         });
 
         rulesContainer.delegate('click', function (e) {
@@ -280,12 +239,13 @@
             var hiddenInputField = A.one('input[name="' + hiddenInputFieldName + '"]');
 
             inputField.plug(A.Plugin.ACSelection, {
+                requestTemplate: '&${renderResponse.namespace}q={query}',
                 dataUrl: inputField.getAttribute('dataUrl'),
                 selection: hiddenInputField.get('value')
             });
 
             // workaround for http://yuilibrary.com/projects/yui3/ticket/2531651
-            if (YUI.version === '3.4.0') {
+            if (AUI.version === '3.4.0') {
                 inputField.as._afterListInputFocus();
             }
 
@@ -304,18 +264,18 @@
             var rowTemplate = A.one('#${renderResponse.namespace}' + value + '-template').getContent();
             var rowNode = A.Node.create(rowTemplate);
 
-            rowNode.one('.ruletype').set('value', value)
+            rowNode.one('.ruletype').set('value', value);
 
             currentRuleDiv.replace(rowNode);
         }, '.ruletype');
 
-        popupForm.one('input.main').on('click', function (e) {
+        popupForm.one('.submit-button').on('click', function (e) {
             e.preventDefault();
 
             var rulesList = [];
             rulesContainer.all('div.rule').each(function (ruleDiv) {
                 var ruleData = {};
-                var inputs = ruleDiv.all('input, select')
+                var inputs = ruleDiv.all('input, select');
                 inputs.each(function (input) {
                     var name = input.get('name');
                     if (name.indexOf(portletNamespace) == 0) {
@@ -328,7 +288,7 @@
 
             var conditionType = popupForm.one('select[name="${renderResponse.namespace}condition-type"]').get('value');
 
-            popupForm.one('input[name="rules"]').set('value', A.JSON.stringify({
+            popupForm.one('input[name="${renderResponse.namespace}rules"]').set('value', A.JSON.stringify({
                 'condition-type': conditionType,
                 'rules': rulesList
             }));

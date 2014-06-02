@@ -1,13 +1,3 @@
-.rules-set {
-    margin-top:10px;
-}
-
-.rule {
-    display: table;
-    width: 100%;
-    margin-bottom: 5px;
-}
-
 .rule-error {
     visibility: hidden;
 }
@@ -16,32 +6,56 @@
     visibility: visible;
 }
 
+.rules-set {
+    display: table;
+    table-layout: fixed;
+    width: 100%;
+    vertical-align: middle;
+    border-collapse:separate;
+    border-spacing: 0 5px;
+}
+
+.rules-set input {
+    -moz-box-sizing: border-box; -webkit-box-sizing: border-box; box-sizing: border-box;
+    height: auto !important;
+}
+
+.rule {
+    display: table-row;
+}
+
 .column {
+    float:none !important;
     display: table-cell;
 }
 
+.column.rule-types {
+    width:230px;
+}
+
+
 .column.main {
     width: 100%;
-    padding-right: 10px;
 }
 
-.column.main .aui-field-inline, .column.main .aui-field-inline .aui-field-content {
-    width: 100%;
-}
-
-.column.last {
+.column.rule-controls {
+    width:65px;
     text-align: right;
-    white-space: nowrap;
 }
 
 input.expand {
     width:100%;
 }
 
-.buttons {
-    width: 50px;
+ul.yui3-aclist-list {
+    margin: 0 !important;
 }
 
-.aui-field-wrapper.rules-field-wrapper {
-    overflow: visible;
+div.url-match-type {
+    float: left;
+    padding-right: 10px;
+}
+
+div.url-match-argument {
+    overflow: hidden;
 }

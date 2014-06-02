@@ -4,11 +4,10 @@
 <liferay-portlet:renderURL var="url" />
 <c:set value="${SEARCH_CONTAINER_RESULT_ROW.object}" var="popup"/>
 
-
 <script type="text/javascript">
     function ${renderResponse.namespace}showPreview${popup.primaryKey}() {
         AUI().use('plugin-popup', function (A) {
-            new A.PopupDialog({
+            Popups.showPopup({
                 mustConfirm : ${popup.mustConfirm},
                 width: ${popup.width},
                 title: '<popups:unicode-formatter message="${popup.title}" />',
@@ -17,7 +16,7 @@
                     close: '<spring:message code="close"/>',
                     confirm: '<spring:message code="confirm"/>'
                 }
-            }).render();
+            });
         });
         return false;
     }

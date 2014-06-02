@@ -23,7 +23,7 @@ AUI.add('ac-selectbox', function(A) {
             resultTextLocator: function (response) {
                 return response.name;
             },
-            requestTemplate: '&q={query}'
+            requestTemplate: config.requestTemplate
         });
 
         this.set(SELECTION, config.selection);

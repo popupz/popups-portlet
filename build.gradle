@@ -22,7 +22,7 @@ apply plugin: 'liferay-portlet'
 apply plugin: 'liferay-servicebuilder'
 
 archivesBaseName = 'popups-portlet'
-version = '1.0.0.5'
+version = '1.0.0.6'
 
 // scala 2.10 is not backwards compatible with java 5 see : https://groups.google.com/forum/#!topic/scala-language/oskST3kY7nI
 
