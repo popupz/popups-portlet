@@ -71,4 +71,15 @@
         </security-role-ref>
     </portlet>
 
+    <filter>
+        <filter-name>cache-busting-filter</filter-name>
+        <filter-class>com.github.popupz.popups.portlet.popup.filter.CacheBustingFilter</filter-class>
+        <lifecycle>RENDER_PHASE</lifecycle>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>cache-busting-filter</filter-name>
+        <portlet-name>popups</portlet-name>
+    </filter-mapping>
+
 </portlet-app>
