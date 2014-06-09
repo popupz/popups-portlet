@@ -10,7 +10,7 @@ import org.springframework.web.portlet.ModelAndView
 import com.liferay.portal.theme.ThemeDisplay
 import scala.collection.JavaConversions._
 import scala.collection.JavaConverters._
-import javax.portlet.{PortletRequest, RenderRequest}
+import javax.portlet.{RenderResponse, PortletRequest, RenderRequest}
 import com.github.popupz.popups.model.Popup
 import annotation.tailrec
 import org.json.{JSONObject, JSONArray}
@@ -28,27 +28,24 @@ class PopupController(popupLocalService: PopupLocalService,
                       userGroupRoleLocalService: UserGroupRoleLocalService) {
 
   @RenderMapping
-  def view(renderRequest: RenderRequest, themeDisplay: ThemeDisplay) = {
+  def view(renderRequest: RenderRequest, renderResponse: RenderResponse, themeDisplay: ThemeDisplay) = {
 
     // in lr 6.1.2-ce-ga3 portlets defined in layout.static.portlets.all are also rendered in the control panel
 
     val group = themeDisplay.getLayout.getGroup
 
-    val popups = group.isControlPanel match {
-      case true => Seq[Popup]()
-      case false => {
-        val scopeGroupId = group.getGroupId
-        val companyGroupId = groupLocalService.getCompanyGroup(themeDisplay.getCompanyId).getGroupId
+    val popups = if (group.isControlPanel) Seq.empty else {
+      val scopeGroupId = group.getGroupId
+      val companyGroupId = groupLocalService.getCompanyGroup(themeDisplay.getCompanyId).getGroupId
 
-        val scopeGroupPopups = popupLocalService.getPopupsByGroupId(scopeGroupId)
-        val companyPopups = popupLocalService.getPopupsByGroupId(companyGroupId)
+      val scopeGroupPopups = popupLocalService.getPopupsByGroupId(scopeGroupId)
+      val companyPopups = popupLocalService.getPopupsByGroupId(companyGroupId)
 
-        val allPopups = scopeGroupPopups ++ companyPopups
+      val allPopups = scopeGroupPopups ++ companyPopups
 
-        allPopups
-          .filter(rulesMatch(_)(renderRequest))
-          .filter(hasNotBeenViewed(_)(renderRequest))
-      }
+      allPopups
+        .filter(rulesMatch(_)(renderRequest))
+        .filter(hasNotBeenViewed(_)(renderRequest))
     }
 
     new ModelAndView("popup")
